@@ -3,7 +3,10 @@
 const prebuiltCrateHash = '35bf996e7205879f';
 
 const prebuiltSha256 = <String, String>{
-  'aarch64-linux-android': 'e37f970dac318defff61291b45a7421a35cbcdea93350f542f768f1458b20e6b',
-  'armv7-linux-androideabi': '8cbc4910ce2b152e044c4c3b5f19302ed34bf53df8c83229946053bcc120c608',
-  'x86_64-linux-android': '819e3bf4c20344316630ab56f9d22da46e13b92fc4622c8d0e091be77446260e',
+  'aarch64-linux-android':
+      'e37f970dac318defff61291b45a7421a35cbcdea93350f542f768f1458b20e6b',
+  'armv7-linux-androideabi':
+      '8cbc4910ce2b152e044c4c3b5f19302ed34bf53df8c83229946053bcc120c608',
+  'x86_64-linux-android':
+      '819e3bf4c20344316630ab56f9d22da46e13b92fc4622c8d0e091be77446260e',
 };
