@@ -1,3 +1,10 @@
+## 0.6.0-dev.1
+
+- Use prebuilt Android binaries by default. The build hook downloads the
+  library for the target ABI from this repository's GitHub release and
+  verifies its SHA-256 checksum, so apps no longer need a Rust toolchain.
+- Add the `build_from_source` user define to compile the Rust crate instead.
+
 ## 0.6.0-dev.0
 
 - Prepare next minor prerelease.

@@ -1,3 +1,7 @@
+## 0.8.0-dev.1
+
+- Version bump alongside `irondash_engine_context` 0.6.0-dev.1. No changes.
+
 ## 0.8.0-dev.0
 
 - Prepare next minor prerelease.
