@@ -1,8 +1,7 @@
 import 'package:code_assets/code_assets.dart';
 import 'package:hooks/hooks.dart';
-
-import 'prebuilt.dart';
-import 'prebuilt.g.dart';
+import 'package:irondash_engine_context/src/hook/prebuilt.dart';
+import 'package:irondash_engine_context/src/hook/prebuilt.g.dart';
 
 const library = PrebuiltLibrary(
   package: 'irondash_engine_context',

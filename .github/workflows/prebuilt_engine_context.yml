@@ -11,7 +11,7 @@ name: Prebuilt Binaries (engine_context)
 # Builds the Android library of irondash_engine_context for every ABI and
 # publishes it as a GitHub release tagged with the hash of the Rust sources.
 # Afterwards run `tool/prebuilt.dart sync` locally in engine_context/dart and
-# commit hook/prebuilt.g.dart.
+# commit lib/src/hook/prebuilt.g.dart.
 
 permissions:
   contents: read
