@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   code_assets: ^1.0.0
+  crypto: ^3.0.0
   flutter:
     sdk: flutter
   hooks: ^2.0.2

@@ -1,0 +1,109 @@
+on:
+  push:
+    branches: [main]
+    paths:
+      - engine_context/dart/android/rust/**
+      - .github/workflows/prebuilt_engine_context.yml
+  workflow_dispatch:
+
+name: Prebuilt Binaries (engine_context)
+
+# Builds the Android library of irondash_engine_context for every ABI and
+# publishes it as a GitHub release tagged with the hash of the Rust sources.
+# Afterwards run `tool/prebuilt.dart sync` locally in engine_context/dart and
+# commit hook/prebuilt.g.dart.
+
+permissions:
+  contents: read
+
+env:
+  PACKAGE_DIR: engine_context/dart
+  CRATE_DIR: engine_context/dart/android/rust
+  LIB_NAME: irondash_engine_context_native
+
+jobs:
+  Tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+      exists: ${{ steps.tag.outputs.exists }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - id: tag
+        working-directory: ${{ env.PACKAGE_DIR }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flutter pub get
+          tag=$(dart --packages=.dart_tool/package_config.json tool/prebuilt.dart tag)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "Release $tag already exists; nothing to build."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  Build:
+    needs: Tag
+    if: needs.Tag.outputs.exists != 'true'
+    name: Build ${{ matrix.triple }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        triple:
+          - aarch64-linux-android
+          - armv7-linux-androideabi
+          - x86_64-linux-android
+    env:
+      TRIPLE: ${{ matrix.triple }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Android NDK
+        run: |
+          grep Pkg.Revision "$ANDROID_NDK_LATEST_HOME/source.properties"
+          bin="$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          # Link against API 24 so the library loads on every supported device.
+          clang="$bin/${TRIPLE/armv7/armv7a}24-clang"
+          var=${TRIPLE//-/_}
+          {
+            echo "CC_$var=$clang"
+            echo "AR_$var=$bin/llvm-ar"
+            echo "CARGO_TARGET_${var^^}_LINKER=$clang"
+          } >> "$GITHUB_ENV"
+      - name: Build
+        working-directory: ${{ env.CRATE_DIR }}
+        run: |
+          rustup toolchain install
+          cargo build --release --target "$TRIPLE"
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          cp "target/$TRIPLE/release/lib$LIB_NAME.so" "$GITHUB_WORKSPACE/dist/$TRIPLE-lib$LIB_NAME.so"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.triple }}
+          path: dist/*
+          if-no-files-found: error
+
+  Release:
+    needs: [Tag, Build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.Tag.outputs.tag }}
+        run: |
+          ls -l dist
+          gh release create "$TAG" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "$TAG" \
+            --latest=false \
+            --notes "Prebuilt native libraries built from $GITHUB_SHA."
