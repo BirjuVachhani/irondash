@@ -28,7 +28,7 @@ jobs:
       tag: ${{ steps.tag.outputs.tag }}
       exists: ${{ steps.tag.outputs.exists }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -60,7 +60,7 @@ jobs:
     env:
       TRIPLE: ${{ matrix.triple }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Configure Android NDK
         run: |
           grep Pkg.Revision "$ANDROID_NDK_LATEST_HOME/source.properties"
@@ -80,7 +80,7 @@ jobs:
           cargo build --release --target "$TRIPLE"
           mkdir -p "$GITHUB_WORKSPACE/dist"
           cp "target/$TRIPLE/release/lib$LIB_NAME.so" "$GITHUB_WORKSPACE/dist/$TRIPLE-lib$LIB_NAME.so"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.triple }}
           path: dist/*
@@ -92,7 +92,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: dist
           merge-multiple: true
